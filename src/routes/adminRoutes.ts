@@ -8,7 +8,9 @@ import {
   deleteProduct,
   getAdminProducts,
   getEditProductForm,
+  getImportProductsPage,
   getNewProductForm,
+  importProductsFromApify,
   updateProduct,
 } from "../controllers/productController";
 
@@ -19,6 +21,9 @@ router.use(requireAuth);
 router.get("/dashboard", getAdminDashboard);
 
 router.get("/products", getAdminProducts);
+router.get("/products/import", getImportProductsPage);
+router.post("/products/import", importProductsFromApify);
+
 router.get("/products/new", getNewProductForm);
 router.post("/products", upload.single("image"), createProduct);
 

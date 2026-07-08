@@ -650,3 +650,17 @@ footer {
     object-fit: cover;
     border-radius: 18px;
 }
+
+.success-alert {
+    background: #e6f7ed;
+    color: #067647;
+    border: 1px solid #abefc6;
+}
+
+.form-help {
+    padding: 16px;
+    border-radius: 16px;
+    background: var(--light);
+    border: 1px solid var(--border);
+    color: var(--muted);
+}

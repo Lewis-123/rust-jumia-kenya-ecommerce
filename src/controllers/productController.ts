@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Product from "../models/Product";
 import slugify from "../utils/slugify";
+import { runJumiaKenyaScraper, ApifyJumiaItem } from "../services/apifyService";
+
 
 const createUniqueSlug = async (
   name: string,
@@ -264,4 +266,134 @@ export const deleteProduct = async (
   }
 
   res.redirect("/admin/products");
+};
+
+const extractPrice = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const cleanedValue = value.replace(/[^\d.]/g, "");
+  const parsedValue = Number(cleanedValue);
+
+  return Number.isFinite(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : undefined;
+};
+
+const extractImageUrl = (item: ApifyJumiaItem): string | undefined => {
+  if (item.imageUrl) return item.imageUrl;
+  if (item.image) return item.image;
+
+  if (Array.isArray(item.images) && item.images.length > 0) {
+    return item.images[0];
+  }
+
+  return undefined;
+};
+
+const extractProductUrl = (item: ApifyJumiaItem): string | undefined => {
+  return item.productUrl || item.url || item.link;
+};
+
+export const getImportProductsPage = (req: Request, res: Response): void => {
+  res.render("admin/import-products", {
+    title: "Import Jumia Products | Kenya Ecommerce Store",
+    description: "Import Kenyan market products from Jumia using the Apify API.",
+    error: null,
+    success: null,
+    importedCount: null,
+  });
+};
+
+export const importProductsFromApify = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const searchQuery = String(req.body.searchQuery || "").trim();
+    const category = String(req.body.category || "").trim();
+
+    if (!searchQuery || searchQuery.length < 2) {
+      throw new Error("Please enter a product search term.");
+    }
+
+    if (!category || category.length < 2) {
+      throw new Error("Please enter a category for the imported products.");
+    }
+
+    const items = await runJumiaKenyaScraper(searchQuery);
+
+    let importedCount = 0;
+
+    for (const item of items) {
+      const name = String(item.title || item.name || "").trim();
+      const price =
+        extractPrice(item.price) ||
+        extractPrice(item.currentPrice);
+
+      const originalPrice =
+        extractPrice(item.originalPrice) ||
+        extractPrice(item.oldPrice);
+
+      const imageUrl = extractImageUrl(item);
+      const productUrl = extractProductUrl(item);
+
+      if (!name || !price || !imageUrl) {
+        continue;
+      }
+
+      const existingProduct = productUrl
+        ? await Product.findOne({ productUrl })
+        : null;
+
+      if (existingProduct) {
+        continue;
+      }
+
+      const slug = await createUniqueSlug(name);
+
+      await Product.create({
+        name,
+        slug,
+        description: `Imported product from Jumia Kenya search results for "${searchQuery}".`,
+        price,
+        originalPrice,
+        category,
+        brand: item.brand || "",
+        imageUrl,
+        productUrl: productUrl || "",
+        stock: 10,
+        isFeatured: false,
+        isActive: true,
+        source: "apify-jumia",
+        sourceId: productUrl || slug,
+      });
+
+      importedCount += 1;
+    }
+
+    res.render("admin/import-products", {
+      title: "Import Jumia Products | Kenya Ecommerce Store",
+      description: "Import Kenyan market products from Jumia using the Apify API.",
+      error: null,
+      success: `${importedCount} products imported successfully.`,
+      importedCount,
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Product import failed.";
+
+    res.status(400).render("admin/import-products", {
+      title: "Import Jumia Products | Kenya Ecommerce Store",
+      description: "Import Kenyan market products from Jumia using the Apify API.",
+      error: errorMessage,
+      success: null,
+      importedCount: null,
+    });
+  }
 };

@@ -1,0 +1,63 @@
+<section class="page-header">
+    <p class="eyebrow">Apify Import</p>
+
+    <h1>
+        Import Products from Jumia Kenya
+    </h1>
+
+    <p>
+        Search Jumia Kenya product listings through the Apify API and save
+        selected product data into MongoDB.
+    </p>
+</section>
+
+<section class="form-section">
+    <form class="form-card wide-form"
+          action="/admin/products/import"
+          method="POST">
+
+        <% if (error) { %>
+            <div class="alert error-alert">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <% if (success) { %>
+            <div class="alert success-alert">
+                <%= success %>
+            </div>
+        <% } %>
+
+        <label for="searchQuery">Product Search Term</label>
+        <input id="searchQuery"
+               name="searchQuery"
+               type="text"
+               placeholder="Example: phones, laptops, shoes, headphones"
+               required>
+
+        <label for="category">Category Name</label>
+        <input id="category"
+               name="category"
+               type="text"
+               placeholder="Example: Electronics"
+               required>
+
+        <div class="form-help">
+            <p>
+                The system will search Jumia Kenya, collect available product
+                names, prices, images, and links, then save valid products to
+                the database.
+            </p>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn primary-btn" type="submit">
+                Import Products
+            </button>
+
+            <a class="btn secondary-dark-btn" href="/admin/products">
+                Back to Products
+            </a>
+        </div>
+    </form>
+</section>

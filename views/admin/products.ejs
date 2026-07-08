@@ -13,14 +13,18 @@
 
 <section class="section">
     <div class="admin-toolbar">
-        <a class="btn primary-btn" href="/admin/products/new">
-            Add Product
-        </a>
+    <a class="btn primary-btn" href="/admin/products/new">
+        Add Product
+    </a>
 
-        <a class="btn secondary-dark-btn" href="/admin/dashboard">
-            Back to Dashboard
-        </a>
-    </div>
+    <a class="btn secondary-dark-btn" href="/admin/products/import">
+        Import from Jumia
+    </a>
+
+    <a class="btn secondary-dark-btn" href="/admin/dashboard">
+        Back to Dashboard
+    </a>
+</div>
 
     <% if (products && products.length > 0) { %>
         <div class="table-wrapper">
