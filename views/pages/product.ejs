@@ -16,15 +16,17 @@
             </p>
         <% } %>
 
-        <p class="product-price large-price">
-            KSh <%= product.price.toLocaleString("en-KE") %>
-        </p>
-
-        <% if (product.originalPrice) { %>
-            <p class="original-price">
-                Original Price: KSh <%= product.originalPrice.toLocaleString("en-KE") %>
+        <div class="price-row detail-price-row">
+            <p class="product-price large-price">
+                KSh <%= product.price.toLocaleString("en-KE") %>
             </p>
-        <% } %>
+
+            <% if (product.originalPrice && product.originalPrice > product.price) { %>
+                <p class="original-price">
+                    KSh <%= product.originalPrice.toLocaleString("en-KE") %>
+                </p>
+            <% } %>
+        </div>
 
         <p>
             <%= product.description %>
@@ -34,14 +36,66 @@
             Stock Available: <%= product.stock %>
         </p>
 
-        <% if (product.productUrl) { %>
-            <a class="btn primary-btn" href="<%= product.productUrl %>" target="_blank">
-                View Source Product
-            </a>
-        <% } else { %>
-            <a class="btn primary-btn" href="/contact">
+        <div class="product-detail-actions">
+            <% if (product.productUrl) { %>
+                <a class="btn primary-btn" href="<%= product.productUrl %>" target="_blank">
+                    View Source Product
+                </a>
+            <% } %>
+
+            <a class="btn secondary-dark-btn" href="/contact">
                 Contact Us
             </a>
-        <% } %>
+
+            <a class="btn secondary-dark-btn" href="/shop">
+                Back to Shop
+            </a>
+        </div>
     </div>
 </section>
+
+<% if (relatedProducts && relatedProducts.length > 0) { %>
+    <section class="section">
+        <div class="section-heading">
+            <p class="eyebrow">Related Products</p>
+
+            <h2>
+                More in <%= product.category %>
+            </h2>
+
+            <p>
+                Browse similar products from the same category.
+            </p>
+        </div>
+
+        <div class="product-grid">
+            <% relatedProducts.forEach(function(relatedProduct) { %>
+                <article class="product-card">
+                    <a href="/shop/<%= relatedProduct.slug %>">
+                        <img src="<%= relatedProduct.imageUrl %>" alt="<%= relatedProduct.name %>">
+                    </a>
+
+                    <div class="product-card-content">
+                        <p class="product-category">
+                            <%= relatedProduct.category %>
+                        </p>
+
+                        <h3>
+                            <a href="/shop/<%= relatedProduct.slug %>">
+                                <%= relatedProduct.name %>
+                            </a>
+                        </h3>
+
+                        <p class="product-price">
+                            KSh <%= relatedProduct.price.toLocaleString("en-KE") %>
+                        </p>
+
+                        <a class="text-link" href="/shop/<%= relatedProduct.slug %>">
+                            View Product
+                        </a>
+                    </div>
+                </article>
+            <% }) %>
+        </div>
+    </section>
+<% } %>

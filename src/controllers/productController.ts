@@ -4,7 +4,6 @@ import Product from "../models/Product";
 import slugify from "../utils/slugify";
 import { runJumiaKenyaScraper, ApifyJumiaItem } from "../services/apifyService";
 
-
 const createUniqueSlug = async (
   name: string,
   currentProductId?: string
@@ -40,6 +39,51 @@ const parseOptionalNumber = (value: unknown): number | undefined => {
 
   const parsedValue = Number(value);
   return Number.isFinite(parsedValue) ? parsedValue : undefined;
+};
+
+const extractPrice = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return Math.round(value);
+  }
+
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const cleanedValue = value.replace(/[^\d.]/g, "");
+  const parsedValue = Number(cleanedValue);
+
+  return Number.isFinite(parsedValue) && parsedValue > 0
+    ? Math.round(parsedValue)
+    : undefined;
+};
+
+const extractImageUrl = (item: ApifyJumiaItem): string | undefined => {
+  if (item.imageUrl) return item.imageUrl;
+  if (item.image_url) return item.image_url;
+  if (item.image) return item.image;
+  if (item.thumbnail) return item.thumbnail;
+
+  if (Array.isArray(item.images) && item.images.length > 0) {
+    return item.images[0];
+  }
+
+  return undefined;
+};
+
+const extractProductUrl = (item: ApifyJumiaItem): string | undefined => {
+  return item.productUrl || item.product_url || item.url || item.link;
+};
+
+const extractCategory = (
+  item: ApifyJumiaItem,
+  fallbackCategory: string
+): string => {
+  if (Array.isArray(item.categories) && item.categories.length > 0) {
+    return item.categories[item.categories.length - 1];
+  }
+
+  return item.category || fallbackCategory;
 };
 
 export const getAdminProducts = async (
@@ -243,6 +287,11 @@ export const updateProduct = async (
   } catch (error) {
     const product = await Product.findById(productId).lean();
 
+    if (!product) {
+      res.redirect("/admin/products");
+      return;
+    }
+
     const errorMessage =
       error instanceof Error ? error.message : "Product could not be updated.";
 
@@ -266,38 +315,6 @@ export const deleteProduct = async (
   }
 
   res.redirect("/admin/products");
-};
-
-const extractPrice = (value: unknown): number | undefined => {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const cleanedValue = value.replace(/[^\d.]/g, "");
-  const parsedValue = Number(cleanedValue);
-
-  return Number.isFinite(parsedValue) && parsedValue > 0
-    ? parsedValue
-    : undefined;
-};
-
-const extractImageUrl = (item: ApifyJumiaItem): string | undefined => {
-  if (item.imageUrl) return item.imageUrl;
-  if (item.image) return item.image;
-
-  if (Array.isArray(item.images) && item.images.length > 0) {
-    return item.images[0];
-  }
-
-  return undefined;
-};
-
-const extractProductUrl = (item: ApifyJumiaItem): string | undefined => {
-  return item.productUrl || item.url || item.link;
 };
 
 export const getImportProductsPage = (req: Request, res: Response): void => {
@@ -331,25 +348,34 @@ export const importProductsFromApify = async (
     let importedCount = 0;
 
     for (const item of items) {
-      const name = String(item.title || item.name || "").trim();
+      const name = String(
+        item.title || item.name || item.productName || ""
+      ).trim();
+
       const price =
+        extractPrice(item.priceNumeric) ||
         extractPrice(item.price) ||
-        extractPrice(item.currentPrice);
+        extractPrice(item.currentPrice) ||
+        extractPrice(item.priceText);
 
       const originalPrice =
+        extractPrice(item.oldPriceNumeric) ||
         extractPrice(item.originalPrice) ||
-        extractPrice(item.oldPrice);
+        extractPrice(item.oldPrice) ||
+        extractPrice(item.oldPriceText);
 
       const imageUrl = extractImageUrl(item);
       const productUrl = extractProductUrl(item);
+      const importedCategory = extractCategory(item, category);
+      const sourceId = item.sku || productUrl || name;
 
       if (!name || !price || !imageUrl) {
         continue;
       }
 
-      const existingProduct = productUrl
-        ? await Product.findOne({ productUrl })
-        : null;
+      const existingProduct = await Product.findOne({
+        $or: [{ sourceId }, ...(productUrl ? [{ productUrl }] : [])],
+      });
 
       if (existingProduct) {
         continue;
@@ -360,10 +386,10 @@ export const importProductsFromApify = async (
       await Product.create({
         name,
         slug,
-        description: `Imported product from Jumia Kenya search results for "${searchQuery}".`,
+        description: `Imported from Jumia Kenya. This product was found under the search term "${searchQuery}".`,
         price,
         originalPrice,
-        category,
+        category: importedCategory,
         brand: item.brand || "",
         imageUrl,
         productUrl: productUrl || "",
@@ -371,7 +397,7 @@ export const importProductsFromApify = async (
         isFeatured: false,
         isActive: true,
         source: "apify-jumia",
-        sourceId: productUrl || slug,
+        sourceId,
       });
 
       importedCount += 1;
