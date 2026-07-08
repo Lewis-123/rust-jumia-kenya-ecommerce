@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js"
-},
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lewis-123/rust-jumia-kenya-ecommerce.git"
@@ -27,6 +27,7 @@
     "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",
     "express-validator": "^7.3.2",
     "method-override": "^3.0.0",
@@ -36,6 +37,7 @@
   "devDependencies": {
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",
+    "@types/express-ejs-layouts": "^2.5.4",
     "@types/express-session": "^1.19.0",
     "@types/method-override": "^3.0.0",
     "@types/multer": "^2.2.0",

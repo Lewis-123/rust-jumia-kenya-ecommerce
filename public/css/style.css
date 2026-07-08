@@ -1,0 +1,60 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+
+header {
+    background: #111;
+    padding: 20px;
+}
+
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+nav a {
+    color: white;
+    text-decoration: none;
+}
+
+
+ul {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+}
+
+
+.hero {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+
+.cta {
+    padding: 40px;
+    text-align: center;
+    background: #eee;
+}
+
+
+footer {
+    padding: 20px;
+    text-align: center;
+}

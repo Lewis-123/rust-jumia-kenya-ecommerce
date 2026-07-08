@@ -1,0 +1,1 @@
+console.log("Kenya Ecommerce frontend loaded");
