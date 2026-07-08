@@ -1,9 +1,10 @@
-import expressLayouts from "express-ejs-layouts";
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import path from "path";
 import mongoose from "mongoose";
+import expressLayouts from "express-ejs-layouts";
 import connectDatabase from "./config/database";
+import publicRoutes from "./routes/publicRoutes";
 
 dotenv.config();
 
@@ -12,25 +13,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.set("view engine", "ejs");
-
 app.set("views", path.join(__dirname, "../views"));
 
 app.use(expressLayouts);
-
 app.set("layout", "partials/layout");
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "../public")));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-app.get("/", (req: Request, res: Response) => {
-  res.render("pages/home", {
-    title: "Home | Kenya Ecommerce Store",
-    description:
-      "Browse affordable products available in the Kenyan market."
-  });
-});
+app.use("/", publicRoutes);
 
 app.get("/health", (req: Request, res: Response) => {
   res.json({

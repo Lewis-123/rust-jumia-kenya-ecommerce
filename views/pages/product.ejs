@@ -1,0 +1,47 @@
+<section class="product-detail">
+    <div class="product-detail-image">
+        <img src="<%= product.imageUrl %>" alt="<%= product.name %>">
+    </div>
+
+    <div class="product-detail-content">
+        <p class="eyebrow"><%= product.category %></p>
+
+        <h1>
+            <%= product.name %>
+        </h1>
+
+        <% if (product.brand) { %>
+            <p class="product-brand">
+                Brand: <%= product.brand %>
+            </p>
+        <% } %>
+
+        <p class="product-price large-price">
+            KSh <%= product.price.toLocaleString("en-KE") %>
+        </p>
+
+        <% if (product.originalPrice) { %>
+            <p class="original-price">
+                Original Price: KSh <%= product.originalPrice.toLocaleString("en-KE") %>
+            </p>
+        <% } %>
+
+        <p>
+            <%= product.description %>
+        </p>
+
+        <p class="stock-status">
+            Stock Available: <%= product.stock %>
+        </p>
+
+        <% if (product.productUrl) { %>
+            <a class="btn primary-btn" href="<%= product.productUrl %>" target="_blank">
+                View Source Product
+            </a>
+        <% } else { %>
+            <a class="btn primary-btn" href="/contact">
+                Contact Us
+            </a>
+        <% } %>
+    </div>
+</section>

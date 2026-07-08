@@ -1,0 +1,56 @@
+<section class="page-header">
+    <p class="eyebrow">Shop</p>
+
+    <h1>
+        Browse Products
+    </h1>
+
+    <p>
+        Explore products available in the Kenyan market.
+    </p>
+</section>
+
+<section class="section">
+    <% if (products && products.length > 0) { %>
+        <div class="product-grid">
+            <% products.forEach(function(product) { %>
+                <article class="product-card">
+                    <a href="/shop/<%= product.slug %>">
+                        <img src="<%= product.imageUrl %>" alt="<%= product.name %>">
+                    </a>
+
+                    <div class="product-card-content">
+                        <p class="product-category"><%= product.category %></p>
+
+                        <h2>
+                            <a href="/shop/<%= product.slug %>">
+                                <%= product.name %>
+                            </a>
+                        </h2>
+
+                        <p class="product-description">
+                            <%= product.description.substring(0, 100) %>...
+                        </p>
+
+                        <p class="product-price">
+                            KSh <%= product.price.toLocaleString("en-KE") %>
+                        </p>
+
+                        <a class="text-link" href="/shop/<%= product.slug %>">
+                            View Product
+                        </a>
+                    </div>
+                </article>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <h2>No products available yet</h2>
+
+            <p>
+                Products will appear here after they are added manually through
+                the admin dashboard or imported from the Apify Jumia Kenya API.
+            </p>
+        </div>
+    <% } %>
+</section>

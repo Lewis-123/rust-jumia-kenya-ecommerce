@@ -1,15 +1,63 @@
 <section class="hero">
+    <div class="hero-content">
+        <p class="eyebrow">Kenyan Market Products</p>
 
-<h1>
-Welcome to Kenya Ecommerce Store
-</h1>
+        <h1>
+            Shop Products Available Across Kenya
+        </h1>
 
-<p>
-Discover products available in the Kenyan market.
-</p>
+        <p>
+            Browse quality products, compare prices, and discover items sourced
+            from trusted Kenyan online marketplaces.
+        </p>
 
-<a href="/shop">
-Shop Now
-</a>
+        <div class="hero-actions">
+            <a class="btn primary-btn" href="/shop">Shop Now</a>
+            <a class="btn secondary-btn" href="/about">Learn More</a>
+        </div>
+    </div>
+</section>
 
+<section class="section">
+    <div class="section-heading">
+        <p class="eyebrow">Featured Products</p>
+        <h2>Popular Picks</h2>
+        <p>
+            Featured products will appear here once they are added by the admin
+            or imported from the Jumia Kenya product API.
+        </p>
+    </div>
+
+    <% if (featuredProducts && featuredProducts.length > 0) { %>
+        <div class="product-grid">
+            <% featuredProducts.forEach(function(product) { %>
+                <article class="product-card">
+                    <a href="/shop/<%= product.slug %>">
+                        <img src="<%= product.imageUrl %>" alt="<%= product.name %>">
+                    </a>
+
+                    <div class="product-card-content">
+                        <p class="product-category"><%= product.category %></p>
+
+                        <h3>
+                            <a href="/shop/<%= product.slug %>">
+                                <%= product.name %>
+                            </a>
+                        </h3>
+
+                        <p class="product-price">
+                            KSh <%= product.price.toLocaleString("en-KE") %>
+                        </p>
+                    </div>
+                </article>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <p>
+                No featured products yet. Products will appear after we add them
+                through the admin dashboard or Apify Jumia import.
+            </p>
+        </div>
+    <% } %>
 </section>
