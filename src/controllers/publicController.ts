@@ -69,17 +69,3 @@ export const getContactPage = (req: Request, res: Response): void => {
       "Contact Kenya Ecommerce Store for customer support, product questions, or business inquiries.",
   });
 };
-
-export const getLoginPage = (req: Request, res: Response): void => {
-  res.render("pages/login", {
-    title: "Admin Login | Kenya Ecommerce Store",
-    description: "Admin login page for managing ecommerce products.",
-  });
-};
-
-export const getRegisterPage = (req: Request, res: Response): void => {
-  res.render("pages/register", {
-    title: "Admin Registration | Kenya Ecommerce Store",
-    description: "Register an admin account to manage ecommerce products.",
-  });
-};

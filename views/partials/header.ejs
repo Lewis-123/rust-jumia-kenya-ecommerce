@@ -1,36 +1,39 @@
 <header>
+    <nav>
+        <a href="/">
+            Kenya Shop
+        </a>
 
-<nav>
+        <ul>
+            <li>
+                <a href="/">Home</a>
+            </li>
 
-<a href="/">
-    Kenya Shop
-</a>
+            <li>
+                <a href="/about">About</a>
+            </li>
 
+            <li>
+                <a href="/shop">Shop</a>
+            </li>
 
-<ul>
+            <li>
+                <a href="/contact">Contact</a>
+            </li>
 
-<li>
-<a href="/">Home</a>
-</li>
+            <% if (currentAdmin) { %>
+                <li>
+                    <a href="/admin/dashboard">Dashboard</a>
+                </li>
 
-<li>
-<a href="/about">About</a>
-</li>
-
-<li>
-<a href="/shop">Shop</a>
-</li>
-
-<li>
-<a href="/contact">Contact</a>
-</li>
-
-<li>
-<a href="/login">Admin</a>
-</li>
-
-</ul>
-
-</nav>
-
+                <li>
+                    <a href="/logout">Logout</a>
+                </li>
+            <% } else { %>
+                <li>
+                    <a href="/login">Admin</a>
+                </li>
+            <% } %>
+        </ul>
+    </nav>
 </header>

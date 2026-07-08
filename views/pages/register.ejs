@@ -13,6 +13,12 @@
 
 <section class="form-section">
     <form class="form-card" action="/register" method="POST">
+        <% if (error) { %>
+            <div class="alert error-alert">
+                <%= error %>
+            </div>
+        <% } %>
+
         <label for="fullName">Full Name</label>
         <input id="fullName" name="fullName" type="text" required>
 
