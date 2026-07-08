@@ -86,16 +86,75 @@ const extractCategory = (
   return item.category || fallbackCategory;
 };
 
+const truncateText = (value: string, maxLength: number): string => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return value.slice(0, maxLength).trimEnd();
+};
+
+const buildImportedDescription = (
+  fullName: string,
+  searchQuery: string
+): string => {
+  const description = `Imported from Jumia Kenya. Full product title: ${fullName}. This product was found under the search term "${searchQuery}".`;
+
+  return truncateText(description, 2000);
+};
+
+const escapeRegex = (value: string): string => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 export const getAdminProducts = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const products = await Product.find().sort({ createdAt: -1 }).lean();
+  const search = String(req.query.search || "").trim();
+  const source = String(req.query.source || "").trim();
+  const status = String(req.query.status || "").trim();
+
+  const filter: Record<string, unknown> = {};
+
+  if (search) {
+    const safeSearch = escapeRegex(search);
+    const searchRegex = new RegExp(safeSearch, "i");
+
+    filter.$or = [
+      { name: searchRegex },
+      { description: searchRegex },
+      { brand: searchRegex },
+      { category: searchRegex },
+    ];
+  }
+
+  if (source === "manual" || source === "apify-jumia") {
+    filter.source = source;
+  }
+
+  if (status === "active") {
+    filter.isActive = true;
+  }
+
+  if (status === "hidden") {
+    filter.isActive = false;
+  }
+
+  if (status === "featured") {
+    filter.isFeatured = true;
+  }
+
+  const products = await Product.find(filter).sort({ createdAt: -1 }).lean();
 
   res.render("admin/products", {
     title: "Manage Products | Kenya Ecommerce Store",
     description: "Admin product management page.",
     products,
+    search,
+    source,
+    status,
+    productCount: products.length,
   });
 };
 
@@ -168,6 +227,7 @@ export const createProduct = async (
       source: "manual",
     });
 
+    req.session.successMessage = "Product created successfully.";
     res.redirect("/admin/products");
   } catch (error) {
     const errorMessage =
@@ -185,7 +245,7 @@ export const getEditProductForm = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const productId = req.params.id;
+  const productId = String(req.params.id || "");
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
     res.redirect("/admin/products");
@@ -211,7 +271,7 @@ export const updateProduct = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const productId = req.params.id;
+  const productId = String(req.params.id || "");
 
   try {
     if (!mongoose.Types.ObjectId.isValid(productId)) {
@@ -283,6 +343,7 @@ export const updateProduct = async (
       runValidators: true,
     });
 
+    req.session.successMessage = "Product updated successfully.";
     res.redirect("/admin/products");
   } catch (error) {
     const product = await Product.findById(productId).lean();
@@ -308,10 +369,11 @@ export const deleteProduct = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const productId = req.params.id;
+  const productId = String(req.params.id || "");
 
   if (mongoose.Types.ObjectId.isValid(productId)) {
     await Product.findByIdAndDelete(productId);
+    req.session.successMessage = "Product deleted successfully.";
   }
 
   res.redirect("/admin/products");
@@ -346,70 +408,81 @@ export const importProductsFromApify = async (
     const items = await runJumiaKenyaScraper(searchQuery);
 
     let importedCount = 0;
+    let skippedCount = 0;
 
     for (const item of items) {
-      const name = String(
-        item.title || item.name || item.productName || ""
-      ).trim();
+      try {
+        const fullName = String(
+          item.title || item.name || item.productName || ""
+        ).trim();
 
-      const price =
-        extractPrice(item.priceNumeric) ||
-        extractPrice(item.price) ||
-        extractPrice(item.currentPrice) ||
-        extractPrice(item.priceText);
+        const name = truncateText(fullName, 150);
 
-      const originalPrice =
-        extractPrice(item.oldPriceNumeric) ||
-        extractPrice(item.originalPrice) ||
-        extractPrice(item.oldPrice) ||
-        extractPrice(item.oldPriceText);
+        const price =
+          extractPrice(item.priceNumeric) ||
+          extractPrice(item.price) ||
+          extractPrice(item.currentPrice) ||
+          extractPrice(item.priceText);
 
-      const imageUrl = extractImageUrl(item);
-      const productUrl = extractProductUrl(item);
-      const importedCategory = extractCategory(item, category);
-      const sourceId = item.sku || productUrl || name;
+        const originalPrice =
+          extractPrice(item.oldPriceNumeric) ||
+          extractPrice(item.originalPrice) ||
+          extractPrice(item.oldPrice) ||
+          extractPrice(item.oldPriceText);
 
-      if (!name || !price || !imageUrl) {
-        continue;
+        const imageUrl = extractImageUrl(item);
+        const productUrl = extractProductUrl(item);
+
+        const importedCategory = truncateText(
+          extractCategory(item, category),
+          80
+        );
+
+        const brand = truncateText(String(item.brand || "").trim(), 80);
+        const sourceId = String(item.sku || productUrl || fullName || name);
+
+        if (!name || !price || !imageUrl) {
+          skippedCount += 1;
+          continue;
+        }
+
+        const existingProduct = await Product.findOne({
+          $or: [{ sourceId }, ...(productUrl ? [{ productUrl }] : [])],
+        });
+
+        if (existingProduct) {
+          skippedCount += 1;
+          continue;
+        }
+
+        const slug = await createUniqueSlug(name);
+
+        await Product.create({
+          name,
+          slug,
+          description: buildImportedDescription(fullName, searchQuery),
+          price,
+          originalPrice,
+          category: importedCategory,
+          brand,
+          imageUrl,
+          productUrl: productUrl || "",
+          stock: 10,
+          isFeatured: false,
+          isActive: true,
+          source: "apify-jumia",
+          sourceId,
+        });
+
+        importedCount += 1;
+      } catch (itemError) {
+        skippedCount += 1;
+        console.error("Skipped one Apify product:", itemError);
       }
-
-      const existingProduct = await Product.findOne({
-        $or: [{ sourceId }, ...(productUrl ? [{ productUrl }] : [])],
-      });
-
-      if (existingProduct) {
-        continue;
-      }
-
-      const slug = await createUniqueSlug(name);
-
-      await Product.create({
-        name,
-        slug,
-        description: `Imported from Jumia Kenya. This product was found under the search term "${searchQuery}".`,
-        price,
-        originalPrice,
-        category: importedCategory,
-        brand: item.brand || "",
-        imageUrl,
-        productUrl: productUrl || "",
-        stock: 10,
-        isFeatured: false,
-        isActive: true,
-        source: "apify-jumia",
-        sourceId,
-      });
-
-      importedCount += 1;
     }
 
-    res.render("admin/import-products", {
-      title: "Import Jumia Products | Kenya Ecommerce Store",
-      description: "Import Kenyan market products from Jumia using the Apify API.",
-      error: null,
-      success: `${importedCount} products imported successfully.`,
-      importedCount,
-    });
+    req.session.successMessage = `${importedCount} products imported successfully. ${skippedCount} products skipped.`;
+    res.redirect("/admin/products");
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Product import failed.";

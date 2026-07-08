@@ -12,6 +12,18 @@
 </section>
 
 <section class="section">
+    <% if (successMessage) { %>
+        <div class="alert success-alert page-alert">
+            <%= successMessage %>
+        </div>
+    <% } %>
+
+    <% if (errorMessage) { %>
+        <div class="alert error-alert page-alert">
+            <%= errorMessage %>
+        </div>
+    <% } %>
+
     <div class="admin-grid">
         <article class="admin-stat-card">
             <p>Total Products</p>
@@ -24,8 +36,23 @@
         </article>
 
         <article class="admin-stat-card">
+            <p>Hidden Products</p>
+            <h2><%= hiddenProducts %></h2>
+        </article>
+
+        <article class="admin-stat-card">
             <p>Featured Products</p>
             <h2><%= featuredProducts %></h2>
+        </article>
+
+        <article class="admin-stat-card">
+            <p>Imported Products</p>
+            <h2><%= importedProducts %></h2>
+        </article>
+
+        <article class="admin-stat-card">
+            <p>Categories</p>
+            <h2><%= categoryCount %></h2>
         </article>
     </div>
 
@@ -48,4 +75,69 @@
             </button>
         </form>
     </div>
+</section>
+
+<section class="section admin-recent-section">
+    <div class="section-heading compact-heading">
+        <p class="eyebrow">Recent Products</p>
+
+        <h2>
+            Latest Catalogue Updates
+        </h2>
+
+        <p>
+            These are the most recently added or imported products.
+        </p>
+    </div>
+
+    <% if (recentProducts && recentProducts.length > 0) { %>
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Source</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% recentProducts.forEach(function(product) { %>
+                        <tr>
+                            <td>
+                                <img class="table-image"
+                                     src="<%= product.imageUrl %>"
+                                     alt="<%= product.name %>">
+                            </td>
+
+                            <td>
+                                <strong><%= product.name %></strong>
+                                <br>
+                                <small><%= product.brand || "No brand" %></small>
+                            </td>
+
+                            <td><%= product.category %></td>
+
+                            <td>
+                                KSh <%= product.price.toLocaleString("en-KE") %>
+                            </td>
+
+                            <td>
+                                <span class="badge <%= product.source === 'apify-jumia' ? 'feature-badge' : 'success-badge' %>">
+                                    <%= product.source === "apify-jumia" ? "Jumia Import" : "Manual" %>
+                                </span>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <h2>No recent products</h2>
+            <p>Add or import products to populate this dashboard section.</p>
+        </div>
+    <% } %>
 </section>

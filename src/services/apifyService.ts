@@ -59,20 +59,23 @@ export const runJumiaKenyaScraper = async (
 
   const apiUrl = `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items`;
 
+  const inputPayload = {
+    startUrls: [
+      {
+        url: jumiaSearchUrl,
+      },
+    ],
+  };
+
   console.log("Sending request to Apify...");
   console.log("Actor ID:", actorId);
   console.log("Jumia search URL:", jumiaSearchUrl);
+  console.log("Apify input payload:", JSON.stringify(inputPayload, null, 2));
 
   try {
     const response = await axios.post<ApifyJumiaItem[]>(
       apiUrl,
-      {
-        startUrls: [
-          {
-            url: jumiaSearchUrl,
-          },
-        ],
-      },
+      inputPayload,
       {
         headers: {
           "Content-Type": "application/json",
@@ -90,6 +93,10 @@ export const runJumiaKenyaScraper = async (
 
     if (Array.isArray(response.data) && response.data.length > 0) {
       console.log("First Apify item keys:", Object.keys(response.data[0]));
+      console.log(
+        "First Apify item sample:",
+        JSON.stringify(response.data[0], null, 2)
+      );
     }
 
     if (!Array.isArray(response.data)) {
@@ -105,12 +112,19 @@ export const runJumiaKenyaScraper = async (
         error.response?.data?.message ||
         error.message;
 
+      console.error("Apify request error:", {
+        statusCode,
+        apiMessage,
+      });
+
       throw new Error(
         `Apify request failed${
           statusCode ? ` with status code ${statusCode}` : ""
         }: ${apiMessage}`
       );
     }
+
+    console.error("Unknown Apify request error:", error);
 
     throw new Error("Apify request failed due to an unknown error.");
   }

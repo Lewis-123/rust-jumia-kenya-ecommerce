@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import expressLayouts from "express-ejs-layouts";
 import session from "express-session";
 import MongoStore from "connect-mongo";
-
+import { flashMiddleware } from "./middleware/flashMiddleware";
 import connectDatabase from "./config/database";
 import publicRoutes from "./routes/publicRoutes";
 import authRoutes from "./routes/authRoutes";
@@ -67,6 +67,8 @@ app.use((req: Request, res: Response, next) => {
 
   next();
 });
+
+app.use(flashMiddleware);
 
 app.use("/", publicRoutes);
 app.use("/", authRoutes);

@@ -774,3 +774,127 @@ footer {
         width: 100%;
     }
 }
+
+.page-alert {
+    margin-bottom: 24px;
+}
+
+.admin-recent-section {
+    padding-top: 20px;
+}
+
+.compact-heading {
+    padding-top: 35px;
+}
+
+.admin-filter-card {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    gap: 18px;
+    align-items: end;
+    padding: 24px;
+    margin-bottom: 24px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+}
+
+.view-btn {
+    background: #eef4ff;
+    color: #1849a9;
+}
+
+@media (max-width: 1000px) {
+    .admin-filter-card {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-filter-card {
+        grid-template-columns: 1fr;
+    }
+}
+
+.site-nav {
+    position: relative;
+}
+
+.brand {
+    color: var(--white);
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+}
+
+.menu-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    background: transparent;
+    cursor: pointer;
+    padding: 9px;
+}
+
+.menu-toggle span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background: var(--white);
+    margin: 5px 0;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 760px) {
+    .site-nav {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 62px;
+        left: 0;
+        width: 100%;
+        padding: 18px;
+        flex-direction: column;
+        gap: 14px;
+        background: var(--dark-soft);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+    }
+
+    .nav-links.show {
+        display: flex;
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .nav-links a {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+    }
+}

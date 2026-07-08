@@ -6,25 +6,94 @@
     </h1>
 
     <p>
-        View, edit, delete, and add ecommerce products from the secured admin
-        backend.
+        View, edit, delete, search, filter, and add ecommerce products from the
+        secured admin backend.
     </p>
 </section>
 
 <section class="section">
+    <% if (successMessage) { %>
+        <div class="alert success-alert page-alert">
+            <%= successMessage %>
+        </div>
+    <% } %>
+
+    <% if (errorMessage) { %>
+        <div class="alert error-alert page-alert">
+            <%= errorMessage %>
+        </div>
+    <% } %>
+
     <div class="admin-toolbar">
-    <a class="btn primary-btn" href="/admin/products/new">
-        Add Product
-    </a>
+        <a class="btn primary-btn" href="/admin/products/new">
+            Add Product
+        </a>
 
-    <a class="btn secondary-dark-btn" href="/admin/products/import">
-        Import from Jumia
-    </a>
+        <a class="btn secondary-dark-btn" href="/admin/products/import">
+            Import from Jumia
+        </a>
 
-    <a class="btn secondary-dark-btn" href="/admin/dashboard">
-        Back to Dashboard
-    </a>
-</div>
+        <a class="btn secondary-dark-btn" href="/admin/dashboard">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <form class="admin-filter-card" action="/admin/products" method="GET">
+        <div class="filter-group">
+            <label for="search">Search Products</label>
+            <input id="search"
+                   name="search"
+                   type="text"
+                   value="<%= search || '' %>"
+                   placeholder="Search by name, brand, category">
+        </div>
+
+        <div class="filter-group">
+            <label for="source">Source</label>
+            <select id="source" name="source">
+                <option value="">All Sources</option>
+                <option value="manual" <%= source === "manual" ? "selected" : "" %>>
+                    Manual
+                </option>
+                <option value="apify-jumia" <%= source === "apify-jumia" ? "selected" : "" %>>
+                    Jumia Import
+                </option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="">All Statuses</option>
+                <option value="active" <%= status === "active" ? "selected" : "" %>>
+                    Active
+                </option>
+                <option value="hidden" <%= status === "hidden" ? "selected" : "" %>>
+                    Hidden
+                </option>
+                <option value="featured" <%= status === "featured" ? "selected" : "" %>>
+                    Featured
+                </option>
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn primary-btn" type="submit">
+                Apply
+            </button>
+
+            <a class="btn secondary-dark-btn" href="/admin/products">
+                Clear
+            </a>
+        </div>
+    </form>
+
+    <div class="shop-summary">
+        <p>
+            Showing <strong><%= productCount %></strong>
+            <%= productCount === 1 ? "product" : "products" %>.
+        </p>
+    </div>
 
     <% if (products && products.length > 0) { %>
         <div class="table-wrapper">
@@ -77,10 +146,20 @@
                                 <% } %>
                             </td>
 
-                            <td><%= product.source %></td>
+                            <td>
+                                <span class="badge <%= product.source === 'apify-jumia' ? 'feature-badge' : 'success-badge' %>">
+                                    <%= product.source === "apify-jumia" ? "Jumia Import" : "Manual" %>
+                                </span>
+                            </td>
 
                             <td>
                                 <div class="table-actions">
+                                    <a class="small-btn view-btn"
+                                       href="/shop/<%= product.slug %>"
+                                       target="_blank">
+                                        View
+                                    </a>
+
                                     <a class="small-btn edit-btn"
                                        href="/admin/products/<%= product._id %>/edit">
                                         Edit
@@ -102,11 +181,11 @@
         </div>
     <% } else { %>
         <div class="empty-state">
-            <h2>No products added yet</h2>
+            <h2>No products found</h2>
 
             <p>
-                Start by adding a product manually. Later, we will add the
-                Apify Jumia Kenya product import feature.
+                Try clearing the filters, adding a product manually, or importing
+                products from Jumia Kenya.
             </p>
         </div>
     <% } %>

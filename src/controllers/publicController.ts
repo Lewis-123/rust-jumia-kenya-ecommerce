@@ -1,12 +1,19 @@
 import { Request, Response } from "express";
-import { FilterQuery } from "mongoose";
-import Product, { IProductDocument } from "../models/Product";
+import Product from "../models/Product";
+import ContactMessage from "../models/ContactMessage";
 
 const escapeRegex = (value: string): string => {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
 
-export const getHomePage = async (req: Request, res: Response): Promise<void> => {
+const isValidEmail = (email: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+export const getHomePage = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const featuredProducts = await Product.find({
     isActive: true,
     isFeatured: true,
@@ -30,11 +37,14 @@ export const getAboutPage = (req: Request, res: Response): void => {
   });
 };
 
-export const getShopPage = async (req: Request, res: Response): Promise<void> => {
+export const getShopPage = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const search = String(req.query.search || "").trim();
   const selectedCategory = String(req.query.category || "").trim();
 
-  const filter: FilterQuery<IProductDocument> = {
+  const filter: Record<string, unknown> = {
     isActive: true,
   };
 
@@ -80,8 +90,10 @@ export const getSingleProductPage = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  const slug = String(req.params.slug || "");
+
   const product = await Product.findOne({
-    slug: req.params.slug,
+    slug,
     isActive: true,
   }).lean();
 
@@ -115,5 +127,84 @@ export const getContactPage = (req: Request, res: Response): void => {
     title: "Contact Us | Kenya Ecommerce Store",
     description:
       "Contact Kenya Ecommerce Store for customer support, product questions, or business inquiries.",
+    formData: {
+      name: "",
+      email: "",
+      message: "",
+    },
+    error: null,
   });
+};
+
+export const submitContactForm = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const fullName = String(req.body.name || "").trim();
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const message = String(req.body.message || "").trim();
+
+    const formData = {
+      name: fullName,
+      email,
+      message,
+    };
+
+    if (fullName.length < 2) {
+      res.status(400).render("pages/contact", {
+        title: "Contact Us | Kenya Ecommerce Store",
+        description:
+          "Contact Kenya Ecommerce Store for customer support, product questions, or business inquiries.",
+        formData,
+        error: "Full name must be at least 2 characters long.",
+      });
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      res.status(400).render("pages/contact", {
+        title: "Contact Us | Kenya Ecommerce Store",
+        description:
+          "Contact Kenya Ecommerce Store for customer support, product questions, or business inquiries.",
+        formData,
+        error: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    if (message.length < 10) {
+      res.status(400).render("pages/contact", {
+        title: "Contact Us | Kenya Ecommerce Store",
+        description:
+          "Contact Kenya Ecommerce Store for customer support, product questions, or business inquiries.",
+        formData,
+        error: "Message must be at least 10 characters long.",
+      });
+      return;
+    }
+
+    await ContactMessage.create({
+      fullName,
+      email,
+      message,
+    });
+
+    req.session.successMessage =
+      "Your message has been sent successfully. We will get back to you soon.";
+
+    res.redirect("/contact");
+  } catch (error) {
+    res.status(500).render("pages/contact", {
+      title: "Contact Us | Kenya Ecommerce Store",
+      description:
+        "Contact Kenya Ecommerce Store for customer support, product questions, or business inquiries.",
+      formData: {
+        name: req.body.name || "",
+        email: req.body.email || "",
+        message: req.body.message || "",
+      },
+      error: "Message could not be sent. Please try again.",
+    });
+  }
 };
