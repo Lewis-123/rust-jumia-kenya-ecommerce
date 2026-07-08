@@ -1,0 +1,109 @@
+<section class="page-header">
+    <p class="eyebrow">Product Management</p>
+
+    <h1>
+        Manage Products
+    </h1>
+
+    <p>
+        View, edit, delete, and add ecommerce products from the secured admin
+        backend.
+    </p>
+</section>
+
+<section class="section">
+    <div class="admin-toolbar">
+        <a class="btn primary-btn" href="/admin/products/new">
+            Add Product
+        </a>
+
+        <a class="btn secondary-dark-btn" href="/admin/dashboard">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <% if (products && products.length > 0) { %>
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th>Source</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% products.forEach(function(product) { %>
+                        <tr>
+                            <td>
+                                <img class="table-image"
+                                     src="<%= product.imageUrl %>"
+                                     alt="<%= product.name %>">
+                            </td>
+
+                            <td>
+                                <strong><%= product.name %></strong>
+                                <br>
+                                <small><%= product.brand || "No brand" %></small>
+                            </td>
+
+                            <td><%= product.category %></td>
+
+                            <td>
+                                KSh <%= product.price.toLocaleString("en-KE") %>
+                            </td>
+
+                            <td><%= product.stock %></td>
+
+                            <td>
+                                <% if (product.isActive) { %>
+                                    <span class="badge success-badge">Active</span>
+                                <% } else { %>
+                                    <span class="badge muted-badge">Hidden</span>
+                                <% } %>
+
+                                <% if (product.isFeatured) { %>
+                                    <span class="badge feature-badge">Featured</span>
+                                <% } %>
+                            </td>
+
+                            <td><%= product.source %></td>
+
+                            <td>
+                                <div class="table-actions">
+                                    <a class="small-btn edit-btn"
+                                       href="/admin/products/<%= product._id %>/edit">
+                                        Edit
+                                    </a>
+
+                                    <form action="/admin/products/<%= product._id %>/delete"
+                                          method="POST"
+                                          onsubmit="return confirm('Delete this product?');">
+                                        <button class="small-btn delete-btn" type="submit">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <h2>No products added yet</h2>
+
+            <p>
+                Start by adding a product manually. Later, we will add the
+                Apify Jumia Kenya product import feature.
+            </p>
+        </div>
+    <% } %>
+</section>
