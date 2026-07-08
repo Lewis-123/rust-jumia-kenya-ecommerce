@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import path from "path";
+import mongoose from "mongoose";
+import connectDatabase from "./config/database";
 
 dotenv.config();
 
@@ -21,6 +23,20 @@ app.get("/", (req: Request, res: Response) => {
   res.send("TypeScript Jumia Kenya Ecommerce project is running.");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.get("/health", (req: Request, res: Response) => {
+  res.json({
+    app: "running",
+    database:
+      mongoose.connection.readyState === 1 ? "connected" : "not connected",
+  });
 });
+
+const startServer = async (): Promise<void> => {
+  await connectDatabase();
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+};
+
+startServer();
