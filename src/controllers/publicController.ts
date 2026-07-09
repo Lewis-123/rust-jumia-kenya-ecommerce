@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Product from "../models/Product";
 import ContactMessage from "../models/ContactMessage";
+import { sendContactMessageEmail } from "../services/emailService";
 
 const escapeRegex = (value: string): string => {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -22,10 +23,21 @@ export const getHomePage = async (
     .limit(4)
     .lean();
 
+  const popularProducts = await Product.find({
+    isActive: true,
+  })
+    .sort({ createdAt: -1 })
+    .limit(8)
+    .lean();
+
+  const fallbackFeaturedProducts =
+    featuredProducts.length > 0 ? featuredProducts : popularProducts.slice(0, 4);
+
   res.render("pages/home", {
     title: "Home | Kenya Ecommerce Store",
     description: "Browse affordable products available in the Kenyan market.",
-    featuredProducts,
+    featuredProducts: fallbackFeaturedProducts,
+    popularProducts,
   });
 };
 
@@ -190,6 +202,12 @@ export const submitContactForm = async (
       message,
     });
 
+    await sendContactMessageEmail({
+      fullName,
+      email,
+      message,
+    });
+
     req.session.successMessage =
       "Your message has been sent successfully. We will get back to you soon.";
 
@@ -204,7 +222,8 @@ export const submitContactForm = async (
         email: req.body.email || "",
         message: req.body.message || "",
       },
-      error: "Message could not be sent. Please try again.",
+      error:
+        "Message could not be sent. Please check the email settings and try again.",
     });
   }
 };

@@ -32,7 +32,8 @@
     "express-validator": "^7.3.2",
     "method-override": "^3.0.0",
     "mongoose": "^9.7.4",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.3"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
@@ -42,6 +43,7 @@
     "@types/method-override": "^3.0.0",
     "@types/multer": "^2.2.0",
     "@types/node": "^26.1.1",
+    "@types/nodemailer": "^8.0.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^6.0.3"
   }

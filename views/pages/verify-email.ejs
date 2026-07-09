@@ -1,0 +1,46 @@
+<section class="page-header">
+    <p class="eyebrow">Email Verification</p>
+
+    <h1>
+        Verify Your Admin Email
+    </h1>
+
+    <p>
+        Enter the 6-digit verification code sent to your email address.
+    </p>
+</section>
+
+<section class="form-section">
+    <form class="form-card" action="/verify-email" method="POST">
+        <% if (successMessage) { %>
+            <div class="alert success-alert">
+                <%= successMessage %>
+            </div>
+        <% } %>
+
+        <% if (error) { %>
+            <div class="alert error-alert">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <label for="code">Verification Code</label>
+        <input
+            id="code"
+            name="code"
+            type="text"
+            inputmode="numeric"
+            minlength="6"
+            maxlength="6"
+            placeholder="Enter 6-digit code"
+            required>
+
+        <button class="btn primary-btn" type="submit">
+            Verify Email
+        </button>
+
+        <p class="form-note">
+            Code expires after 15 minutes.
+        </p>
+    </form>
+</section>

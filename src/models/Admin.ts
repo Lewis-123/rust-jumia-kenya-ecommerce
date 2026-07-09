@@ -6,10 +6,14 @@ export interface IAdmin {
   email: string;
   password: string;
   role: "admin";
+  isVerified: boolean;
+  verificationCodeHash?: string;
+  verificationExpiresAt?: Date;
 }
 
 export interface IAdminDocument extends IAdmin, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
+  compareVerificationCode(candidateCode: string): Promise<boolean>;
 }
 
 const adminSchema = new Schema<IAdminDocument>(
@@ -46,6 +50,20 @@ const adminSchema = new Schema<IAdminDocument>(
       enum: ["admin"],
       default: "admin",
     },
+
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    verificationCodeHash: {
+      type: String,
+      select: false,
+    },
+
+    verificationExpiresAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
@@ -63,6 +81,16 @@ adminSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
+};
+
+adminSchema.methods.compareVerificationCode = async function (
+  candidateCode: string
+): Promise<boolean> {
+  if (!this.verificationCodeHash) {
+    return false;
+  }
+
+  return bcrypt.compare(candidateCode, this.verificationCodeHash);
 };
 
 const Admin: Model<IAdminDocument> =

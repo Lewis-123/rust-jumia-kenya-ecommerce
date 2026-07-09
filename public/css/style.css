@@ -898,3 +898,30 @@ footer {
         padding: 10px 0;
     }
 }
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--white);
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+}
+
+.brand img {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+}
+
+.featured-home-section {
+    background: var(--cream);
+}
+
+.form-card input[name="code"] {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+}
