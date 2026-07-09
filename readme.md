@@ -167,3 +167,16 @@ typescript-jumia-kenya-ecommerce/
 ├── package-lock.json
 ├── README.md
 └── tsconfig.json
+
+## Variables
+MONGODB_URI="mongodb://Lewis:lewis9871@ac-jdwpiop-shard-00-00.ksr3msn.mongodb.net:27017,ac-jdwpiop-shard-00-01.ksr3msn.mongodb.net:27017,ac-jdwpiop-shard-00-02.ksr3msn.mongodb.net:27017/?ssl=true&replicaSet=atlas-uyg9b8-shard-0&authSource=admin&appName=Cluster0"
+DATABASE_NAME="kenya_shop"
+PORT="3000"
+SESSION_SECRET="kenya_shop_admin_secure_session_2026_change_later"
+APIFY_TOKEN="apify_api_caJ5nOhpZBjAgIxZ7YUiXN3g4TijFS1MYHLG"
+APIFY_ACTOR_ID="fatihtahta~jumia-scraper"
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=mucherulewis@gmail.com
+EMAIL_APP_PASSWORD=bfte ikiy vvgj vlaw
+CONTACT_RECEIVER_EMAIL=mucherulewis@gmail.com
