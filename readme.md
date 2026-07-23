@@ -17,6 +17,9 @@ The admin backend is protected with session-based authentication. Admin users ca
 
 ---
 
+##Deployment
+**Link:** https://kenya-shop-ecommerce.onrender.com/ 
+
 ## Main Features
 
 ### Public Frontend
